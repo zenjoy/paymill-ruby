@@ -1,7 +1,7 @@
 module Paymill
   class Request
     attr_reader :uri, :method, :payload, :header
-    
+
     def initialize(method, uri, payload={})
       @method  = method
       @uri     = uri
@@ -15,12 +15,12 @@ module Paymill
     end
 
     private
-        
+
     def connection
       http = Net::HTTP.new(uri.host, uri.port)
       # ssl options
       http.use_ssl      = uri.scheme == 'https'
-      http.ca_file      = File.expand_path('lib/paymill.crt')
+      http.ca_file      = File.expand_path('../../../paymill.crt', __FILE__)
       http.verify_mode  = OpenSSL::SSL::VERIFY_PEER
       # timeout
       http.open_timeout = http.read_timeout = http.ssl_timeout = Paymill.timeout if Paymill.timeout
@@ -29,14 +29,14 @@ module Paymill
       # return the http connection
       http
     end
-    
+
     def request_object
       req = request_class.new(request_path, header)
       req.basic_auth(Paymill.api_key, '')
       req.set_form_data(payload) if post?
       req
     end
-    
+
     def request_class
       Net::HTTP.const_get(method.to_s.capitalize)
     end
